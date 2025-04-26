@@ -1,0 +1,1294 @@
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+html, body {
+    height: 100%;
+    overflow-x: hidden;
+    margin: 0;
+    padding: 0;
+    font-family: 'Montserrat', sans-serif;
+}
+
+body {
+    display: flex;
+    flex-direction: column;
+}
+
+.navbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: #f8f6ed;
+    padding: 0.5rem 2rem;
+    border-bottom: 0.5px solid #d6d4ce;
+    height: 60px;
+    width: 100%;
+    position: fixed;
+    top: 0;
+    z-index: 1000;
+}
+
+.navbar-left {
+    display: flex;
+    align-items: center;
+    position: relative;
+    z-index: 1001; /* Higher than mobile menu */
+}
+
+.logo {
+    width: 100%;
+    height: 25px;
+    margin-right: 1px;
+    margin-top: 5px;
+}
+
+.company-name {
+    font-size: 1.1rem;
+    color: #333;
+    font-style: oblique;
+    margin-right: 30px;
+}
+
+.company-name .bold {
+    font-weight: 700;
+}
+
+.company-name .light {
+    font-weight: 300;
+}
+
+.navbar-center {
+    display: flex;
+    align-items: center;
+}
+
+.navbar-center a {
+    text-decoration: none;
+    color: #333;
+    margin: 0 15px;
+    font-weight: 400;
+    transition: color 0.3s ease;
+    font-size: 0.8rem;
+}
+
+.navbar-center a:hover {
+    color: #007bff;
+}
+
+.navbar-right {
+    margin-left: auto;
+}
+
+.contact-button {
+    background-color: transparent;
+    border: 1px solid #000000;
+    color: black;
+    padding: 5px 15px;
+    border-radius: 50px;
+    text-decoration: none;
+    font-weight: 400;
+    transition: all 0.3s ease;
+    font-size: 0.8rem;
+}
+
+.contact-button:hover {
+    background-color: #007bff;
+    color: white;
+}
+
+/* Hamburger menu - hidden by default on desktop */
+.hamburger-icon {
+    display: none;
+    cursor: pointer;
+    width: 30px;
+    height: 30px;
+    background-image: url('img/nav/hamburger.png');
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    margin-left: auto;
+    z-index: 1001;
+}
+
+/* Mobile menu styles */
+.mobile-menu {
+    display: none;
+    position: fixed;
+    top: 50px; /* Match navbar height */
+    right: -100%;
+    width: 70%;
+    height: 100vh;
+    background-color: #f8f6ed;
+    z-index: 1000;
+    transition: right 0.3s ease;
+    box-shadow: -5px 0 15px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+}
+
+.mobile-menu.active {
+    right: 0;
+}
+
+.mobile-menu a {
+    display: block;
+    padding: 15px 10px;
+    text-decoration: none;
+    color: #333;
+    font-size: 1.2rem;
+    border-bottom: 1px solid #d6d4ce;
+}
+
+.mobile-menu a:last-child {
+    border-bottom: none;
+}
+
+/* Hero Section Styles */
+.hero {
+    min-height: 100vh;
+    width: 100%;
+    background-color: #f7f5ed;
+    display: flex;
+    align-items: center;
+    position: relative;
+    padding-top: 50px; /* Account for navbar height */
+    overflow: visible;
+    margin-bottom: 0; /* Remove bottom margin */
+}
+
+.hero-content {
+    margin-left: 150px;
+    max-width: 600px;
+    color: black;
+    position: relative;
+    z-index: 60; /* Ensure content stays above the sphere */
+}
+
+.hero h1 {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    font-weight: 700;
+    line-height: 1.2;
+}
+
+.hero p {
+    font-size: 1.5rem;
+    margin-bottom: 2rem;
+    font-weight: 400;
+    line-height: 1.4;
+}
+
+.cta-button {
+    display: inline-block;
+    padding: 12px 24px;
+    background-color: black;
+    border: 2px solid black;
+    color: white;
+    text-decoration: none;
+    font-size: 1rem;
+    border-radius: 50px;
+    transition: all 0.3s ease;
+    font-weight: 400;
+}
+
+.cta-button:hover {
+    background-color: white;
+    color: black;
+}
+
+/* Sphere Container Styles - Positioned to the right */
+.sphere-container {
+    position: absolute;
+    top: 0;
+    right: -20%; /* Position container to extend off-screen to the right */
+    width: 100%;
+    height: 140vh;
+    overflow: visible;
+    z-index: 50; /* Higher z-index to ensure sphere is above brand showcase */
+}
+
+#sphere-animation {
+    width: 100%;
+    height: 100%;
+    position: relative;
+    z-index: 30;
+}
+
+#sphere-animation canvas {
+    width: 100% !important;
+    height: 100% !important;
+    display: block;
+    position: relative;
+    z-index: 30;
+}
+
+/* Mobile sphere styles */
+#mobile-sphere-animation {
+    width: 100%;
+    height: 100%;
+    position: relative;
+    z-index: 30;
+}
+
+#mobile-sphere-animation canvas {
+    width: 100% !important;
+    height: 100% !important;
+    display: block;
+    position: relative;
+    z-index: 30;
+}
+
+/* Loading indicator for sphere */
+.loading-sphere {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 50px;
+    height: 50px;
+    border: 3px solid rgba(0, 0, 0, 0.1);
+    border-radius: 50%;
+    border-top-color: #000;
+    animation: spin 1s ease-in-out infinite;
+    z-index: 31;
+}
+
+@keyframes spin {
+    to { transform: translate(-50%, -50%) rotate(360deg); }
+}
+
+/* Brand Showcase Styles */
+.brand-showcase {
+    width: 100%;
+    background-color: #FFFFFF;
+    padding: 60px 60px;
+    position: relative;
+    z-index: 10;
+    display: flex;
+    align-items: center;
+}
+
+.brand-container {
+    max-width: 1300px;
+    margin: 0 auto;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.brand-title {
+    font-size: 1.2rem;
+    font-weight: 500;
+    color: black;
+    margin-right: 60px;
+    white-space: nowrap;
+}
+
+.brand-grid {
+    display: flex;
+    flex: 1;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.brand-item {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 20px;
+    height: 60px;
+}
+
+.brand-item img {
+    max-height: 50px;
+    max-width: 100%;
+    object-fit: contain;
+}
+
+
+/* Individual adjustments for each logo */
+.brand-item:nth-child(1) img { /* Rollies logo */
+    max-height: 40px;
+}
+
+.brand-item:nth-child(2) img { /* Muggles logo */
+    max-height: 25px;
+}
+
+.brand-item:nth-child(3) img { /* Black Cobra logo */
+    max-height: 55px;
+}
+
+.brand-item:nth-child(4) img { /* Mello logo */
+    max-height: 25px;
+}
+
+.brand-item:nth-child(5) img { /* Hit logo */
+    max-height: 40px;
+}
+
+.brand-item:nth-child(6) img { /* Sugar Rush logo */
+    max-height: 44px;
+}
+
+
+/* Card Section Styles */
+.card-section {
+    min-height: auto; /* Changed from 100vh to auto to prevent overlap */
+    padding: 80px 0 120px; /* Added more bottom padding */
+    background-color: #f8f6ed;
+    position: relative;
+    z-index: 5; /* Lower z-index to prevent overlap */
+}
+
+.card-section-container {
+    width: calc(100% - 40px);
+    margin: 0 auto;
+    max-width: 1300px;
+}
+
+.card-section-title {
+    text-align: left;
+    font-size: 2rem;
+    margin-bottom: 50px;
+    color: #333;
+    font-weight: 400;
+}
+
+.card-grid-container {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    gap: 30px;
+}
+
+/* Card link wrapper */
+.card-link {
+    display: block;
+    text-decoration: none;
+    color: inherit;
+    width: calc(25% - 15px);
+    border-radius: 15px;
+    overflow: hidden;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    position: relative;
+    z-index: 5; /* Lowered from 60 to prevent overlap */
+    background-color: #f2efe9;
+}
+
+.service-card {
+    background-color: transparent;
+    border-radius: 15px;
+    overflow: hidden;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+}
+
+.service-card-image {
+    position: relative;
+    overflow: hidden;
+    width: 100%;
+    aspect-ratio: 4/3;
+    display: block;
+}
+
+.primary-image,
+.secondary-image {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.primary-image {
+    z-index: 1;
+    transition: opacity 0.3s ease;
+}
+
+.secondary-image {
+    z-index: 0;
+}
+
+.circle-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 2;
+    pointer-events: none;
+    mix-blend-mode: difference; /* This creates the inverse color effect */
+}
+
+.service-card-content {
+    padding: 25px;
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+}
+
+.service-card-title {
+    font-size: 1.2rem;
+    margin-bottom: 15px;
+    color: #333;
+    font-weight: 600;
+}
+
+.service-card-text {
+    color: #666;
+    margin-bottom: 20px;
+    line-height: 1.5;
+    font-size: 0.95rem;
+    word-wrap: break-word;
+}
+
+.service-card-button {
+    display: inline-block;
+    padding: 8px 20px;
+    background-color: transparent;
+    border: 1px solid #000;
+    color: #000;
+    text-decoration: none;
+    border-radius: 50px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    margin-top: auto;
+    cursor: pointer;
+}
+
+
+/* Products Section Styles */
+.product-showcase {
+    padding: 80px 0;
+    background-color: #ffffff;
+    width: 100%;
+    position: relative;
+    z-index: 4; /* Lower than card section */
+    margin-top: 20px; /* Add space between sections */
+    clear: both; /* Clear any floats */
+}
+
+.product-container {
+    width: calc(100% - 40px);
+    margin: 0 auto;
+    max-width: 1300px;
+}
+
+.product-heading {
+    text-align: left;
+    font-size: 2rem;
+    margin-bottom: 50px;
+    color: #333;
+    font-weight: 400;
+}
+
+.product-grid {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    gap: 40px;
+}
+
+.product-item {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+}
+
+.product-image-wrapper {
+    width: 100%;
+    height: 220px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 20px;
+}
+
+.product-image {
+    max-width: 100%;
+    max-height: 250px;
+    object-fit: contain;
+}
+
+.product-name {
+    font-size: 1.4rem;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 15px;
+}
+
+.product-description {
+    color: #666;
+    line-height: 1.5;
+    font-size: 0.95rem;
+    margin-bottom: 20px;
+}
+
+.product-cta {
+    margin-top: 50px;
+    text-align: center;
+}
+
+.product-button {
+    display: inline-block;
+    padding: 12px 30px;
+    background-color: transparent;
+    border: 1px solid #000;
+    color: #000;
+    text-decoration: none;
+    border-radius: 50px;
+    font-size: 1rem;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.product-button:hover {
+    background-color: #000;
+    color: white;
+}
+
+
+
+/* How It Works Section Styles */
+.how-it-works {
+    padding: 100px 0;
+    background-color: #f8f6ed;
+    position: relative;
+    z-index: 4; /* Lower than card section */
+    clear: both; /* Clear any floats */
+}
+
+.how-container {
+    width: calc(100% - 40px);
+    max-width: 1300px;
+    margin: 0 auto;
+    position: relative;
+}
+
+.how-heading {
+    text-align: left;
+    font-size: 2rem;
+    margin-bottom: 80px;
+    color: #333;
+    font-weight: 400;
+}
+
+.how-row {
+    margin-bottom: 100px;
+    width: 100%;
+    position: relative;
+}
+
+.how-row:last-child {
+    margin-bottom: 0;
+}
+
+.how-step {
+    width: 100%;
+}
+
+.how-content {
+    display: flex;
+    align-items: center;
+    max-width: 900px;
+}
+
+.align-left {
+    margin-left: 0;
+    margin-right: auto;
+    justify-content: flex-start;
+}
+
+.align-right {
+    margin-left: auto;
+    margin-right: 0;
+    flex-direction: row; /* Not row-reverse */
+    justify-content: flex-end;
+}
+
+.step-text {
+    flex: 1;
+    max-width: 60%;
+}
+
+.how-image {
+    width: 35%;
+    max-width: 250px;
+    margin-right: 5%;
+}
+
+.align-right .how-image {
+    margin-right: 0;
+    margin-left: 5%;
+}
+
+.how-image img {
+    width: 100%;
+    height: auto;
+    display: block;
+}
+
+.step-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.step-number {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    border: .75px solid #000;
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: #000;
+    margin-right: 15px;
+}
+
+.step-title {
+    font-size: 1.8rem;
+    color: #333;
+    font-weight: 600;
+}
+
+.step-description {
+    color: #666;
+    line-height: 1.7;
+    font-size: 1.1rem;
+    padding-left: 51px;
+}
+
+/* Connector Lines */
+.connector-lines {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 1;
+}
+
+/* Call to Action Section Styles */
+.cta-section {
+    background-color: #ffffff;
+    padding: 80px 0;
+    min-height: 60vh;
+    text-align: center;
+    width: 100%;
+    position: relative;
+    z-index: 5;
+}
+
+.cta-container {
+    width: calc(100% - 40px);
+    max-width: 1000px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.cta-heading {
+    font-size: 2.2rem;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 40px;
+    text-align: center;
+}
+
+.cta-button-large {
+    display: inline-block;
+    padding: 15px 35px;
+    background-color: black;
+    border: 2px solid black;
+    color: white;
+    text-decoration: none;
+    font-size: 1.1rem;
+    border-radius: 50px;
+    transition: all 0.3s ease;
+    font-weight: 500;
+    cursor: pointer;
+}
+
+.cta-button-large:hover {
+    background-color: white;
+    color: black;
+}
+
+/* Footer Styles */
+.site-footer {
+    background-color: #f8f6ed;
+    padding: 60px 100px 30px 100px;
+    width: 100%;
+    position: relative;
+    z-index: 5;
+    box-sizing: border-box;
+}
+
+.footer-container {
+    width: 100%;
+    max-width: 1300px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+}
+
+.footer-logo {
+    display: flex;
+    align-items: center;
+    margin-bottom: 30px;
+}
+
+.footer-logo img {
+    width: 100%;
+    height: 25px;
+    object-fit: contain;
+}
+
+.footer-menu {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 40px;
+    width: 100%;
+}
+
+.footer-menu a {
+    text-decoration: none;
+    color: #333;
+    margin-bottom: 15px;
+    font-size: 0.9rem;
+    transition: color 0.3s ease;
+    display: block;
+}
+
+.footer-menu a:hover {
+    color: #007bff;
+}
+
+.footer-line {
+    width: 100%;
+    height: 1px;
+    background-color: #d6d4ce;
+    margin-bottom: 20px;
+}
+
+.footer-bottom {
+    display: flex;
+    width: 100%;
+    margin-top: 10px;
+}
+
+.footer-copyright {
+    font-size: 0.8rem;
+    color: #666;
+    flex: 1;
+    white-space: nowrap;
+}
+
+.footer-legal {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    flex: 2;
+    padding: 0 20px;
+}
+
+.footer-legal a {
+    color: black;
+    text-decoration: none;
+    font-size: 0.8rem;
+    transition: color 0.3s ease;
+    white-space: nowrap;
+}
+
+.footer-legal a:hover {
+    color: #007bff;
+}
+
+.footer-social {
+    display: flex;
+    gap: 15px;
+    flex: 1;
+    justify-content: flex-end;
+}
+
+.social-icon {
+    color: black;
+    transition: color 0.3s ease;
+}
+
+.social-icon:hover {
+    color: #007bff;
+}
+
+
+/* Only apply hover effects on non-mobile devices */
+@media (hover: hover) and (min-width: 1025px) {
+    .card-link:hover {
+        transform: translateY(-5px);
+    }
+
+    .card-link:hover .service-card-button {
+        background-color: #000;
+        color: white;
+    }
+}
+
+/* Tablets and smaller desktops - Main breakpoint for mobile layouts */
+@media (max-width: 1024px) {
+    /* Card section mobile styles */
+    .card-section {
+        min-height: auto;
+        padding-bottom: 40px;
+        margin-bottom: 40px;
+    }
+
+    .card-grid-container {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .card-link {
+        width: 100%;
+        max-width: 500px;
+        margin-bottom: 20px;
+    }
+
+    .service-card {
+        width: 100%;
+        margin-bottom: 0;
+    }
+
+    .card-section-title {
+        font-size: 2rem;
+        margin-bottom: 30px;
+    }
+
+    .service-card-image {
+        aspect-ratio: 16/9;
+    }
+
+    /* Brand section mobile styles */
+    .brand-container {
+        flex-direction: column;
+    }
+
+    .brand-title {
+        margin-right: 0;
+        margin-bottom: 30px;
+    }
+
+    .brand-grid {
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 30px;
+    }
+
+    .brand-item {
+        padding: 0 15px;
+    }
+
+    /* Product section mobile styles */
+    .product-showcase {
+        margin-top: 60px;
+        padding: 60px 0;
+    }
+
+    .product-grid {
+        flex-direction: column;
+        align-items: center;
+        gap: 30px;
+    }
+
+    .product-item {
+        max-width: 500px;
+        width: 100%;
+        margin-bottom: 40px;
+    }
+
+    .product-item:last-child {
+        margin-bottom: 0;
+    }
+
+    .product-heading {
+        font-size: 1.8rem;
+    }
+
+    .product-image-wrapper {
+        height: 180px;
+    }
+
+    .product-image {
+        max-height: 160px;
+    }
+
+    .product-cta {
+        margin-top: 30px;
+    }
+
+    /* How It Works section mobile styles */
+    .how-it-works {
+        margin-top: 60px;
+        padding: 60px 0;
+    }
+
+    .how-heading {
+        font-size: 1.8rem;
+        margin-bottom: 50px;
+    }
+
+    .how-row {
+        margin-bottom: 60px;
+    }
+
+    .how-content {
+        max-width: 100%;
+        flex-direction: column;
+        align-items: flex-start;
+        margin-left: 0;
+        margin-right: 0;
+        justify-content: flex-start;
+    }
+
+    .align-right,
+    .align-left {
+        flex-direction: column;
+        align-items: flex-start;
+        margin-left: 0;
+        margin-right: 0;
+        justify-content: flex-start;
+    }
+
+    .step-text {
+        max-width: 100%;
+        order: 2;
+    }
+
+    .how-image {
+        width: 100%;
+        max-width: 200px;
+        margin: 0 0 30px 0;
+        order: 1;
+    }
+
+    .step-title {
+        font-size: 1.4rem;
+    }
+
+    .step-description {
+        font-size: 1rem;
+    }
+
+    /* Hide connector lines on tablet and mobile */
+    .connector-lines {
+        display: none;
+    }
+}
+
+/* Mobile devices - Additional styles for smaller screens */
+@media screen and (max-width: 768px) {
+    /* Navbar mobile styles */
+    .navbar {
+        justify-content: space-between;
+        height: 50px;
+        padding: 0.5rem;
+    }
+
+    .navbar-left {
+        margin-right: auto;
+    }
+
+    .navbar-center,
+    .navbar-right {
+        display: none;
+    }
+
+    .hamburger-icon {
+        display: block;
+    }
+
+    .mobile-menu {
+        display: block;
+    }
+
+    /* Hero section mobile styles */
+    .hero {
+        padding-top: 0;
+        margin-bottom: 0;
+    }
+
+    .hero-content {
+        margin-left: 30px;
+        margin-right: 50px;
+        padding-bottom: 150px;
+        z-index: 15;
+    }
+
+    .hero h1 {
+        font-size: 2rem;
+    }
+
+    .hero p {
+        font-size: 1.2rem;
+    }
+
+    .sphere-container {
+        right: 0;
+        overflow: visible;
+        z-index: 30;
+    }
+
+    /* Brand showcase additional mobile styles */
+    .brand-showcase {
+        margin-top: 50px;
+        padding: 40px 30px;
+    }
+
+    .brand-grid {
+        gap: 20px;
+    }
+
+    .brand-item {
+        height: 50px;
+        padding: 0 10px;
+    }
+
+    /* Card section additional mobile styles */
+    .card-section {
+        min-height: auto; /* Remove the 100vh constraint on mobile */
+        padding-bottom: 100px; /* Add extra padding at the bottom */
+    }
+
+    /* Product showcase additional mobile styles */
+    .product-showcase {
+        margin-top: 100px; /* Increase this value as needed */
+        position: relative;
+        z-index: 4;
+    }
+
+    /* How It Works additional mobile styles */
+    .how-it-works {
+        padding: 60px 0;
+    }
+
+    .how-heading {
+        font-size: 1.8rem;
+        margin-bottom: 50px;
+    }
+
+    .how-row {
+        margin-bottom: 60px;
+    }
+
+    .step-title {
+        font-size: 1.4rem;
+    }
+
+    .step-description {
+        font-size: 1rem;
+    }
+
+    .cta-section {
+        padding: 60px 0;
+    }
+
+    .cta-heading {
+        font-size: 1.8rem;
+        margin-bottom: 30px;
+    }
+    .site-footer {
+        padding: 40px 50px 20px 50px;
+    }
+
+    .footer-bottom {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 20px;
+    }
+
+    .footer-legal {
+        order: 2;
+        justify-content: flex-start;
+        padding: 0;
+    }
+
+    .footer-social {
+        order: 3;
+        justify-content: flex-start;
+    }
+}
+
+/* Small mobile devices */
+@media (max-width: 480px) {
+    .hero {
+        padding-top: 0;
+        margin-bottom: 0;
+    }
+
+    .hero-content {
+        margin-left: 30px;
+        margin-right: 50px;
+        padding-bottom: 50px; /* Reduced padding to prevent too much space */
+        z-index: 100;
+    }
+
+    .hero h1 {
+        font-size: 2rem;
+    }
+
+    .hero p {
+        font-size: 1.2rem;
+    }
+
+    .sphere-container {
+        /* This is the default for non-mobile-small, keep for fallback */
+        right: -50%; /* Push the sphere further to the right */
+        top: 50px; /* Adjust top position */
+        height: 100vh; /* Adjust height */
+        overflow: visible;
+        z-index: 5; /* Lower z-index so text appears above */
+    }
+
+    .desktop-only {
+      display: none !important;
+    }
+
+    .mobile-only {
+      display: block;
+    }
+
+    /* Mobile sphere container styles */
+    .sphere-container.mobile-only {
+        position: absolute;
+        top: 0;
+        right: 0; /* Position at right edge */
+        width: 100%;
+        height: 100vh;
+        overflow: visible;
+        z-index: 50;
+    }
+
+    .card-section-container {
+        width: calc(100% - 40px);
+    }
+
+    .brand-item {
+        width: calc(50% - 20px);
+        margin-bottom: 20px;
+    }
+
+    .brand-grid {
+        justify-content: space-between;
+    }
+
+    .product-showcase {
+        padding: 0px 0;
+        margin-top: 20px;
+    }
+
+    .product-heading {
+        font-size: 1.6rem;
+        margin-bottom: 30px;
+    }
+
+    .product-name {
+        font-size: 1.2rem;
+    }
+
+    .product-description {
+        font-size: 0.9rem;
+    }
+
+    /* Additional How It Works adjustments for very small screens */
+
+    .how-image {
+        max-width: 180px;
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    /* Make sure the image container is full width to allow centering */
+    .how-image img {
+        display: block;
+        margin: 0 auto;
+    }
+
+    /* If needed, center the container too */
+    .how-content {
+        align-items: center;
+        text-align: center;
+    }
+
+    .step-description {
+        padding-left: 30px;
+    }
+
+    .step-header {
+      flex-direction: column;
+      align-items: flex-start;
+      margin-bottom: 15px;
+      padding-left: 30px;
+  }
+
+  .step-number {
+      margin-bottom: 10px;
+      margin-right: 0;
+  }
+
+  .step-title {
+      text-align: left;
+  }
+    .step-title,
+    .step-description {
+        text-align: left !important;
+    }
+    .cta-section {
+        padding: 50px 0;
+    }
+
+    .cta-heading {
+        font-size: 1.5rem;
+        margin-bottom: 25px;
+    }
+
+    .cta-button-large {
+        padding: 12px 30px;
+        font-size: 1rem;
+    }
+    .site-footer {
+        padding: 30px 20px 20px 20px;
+    }
+
+    .footer-legal {
+        flex-direction: column;
+        gap: 10px;
+    }
+}
+
+@media (min-width: 481px) {
+    .desktop-only {
+        display: block;
+    }
+    .mobile-only {
+        display: none !important;
+    }
+}
