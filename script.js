@@ -23,6 +23,13 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
+
+
+
+
+
+
+
     // Mobile sphere variables - declare at the top
     var mobileScene = null;
     var mobileCamera = null;
@@ -51,6 +58,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 alpha: true
             });
 
+            // Set pixel ratio to fix pixelation
+            renderer.setPixelRatio(window.devicePixelRatio);
             renderer.setSize(container.clientWidth, container.clientHeight);
             container.appendChild(renderer.domElement);
 
@@ -59,9 +68,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 loader.style.display = 'none';
             }
 
-            // Sphere geometry
-            const geometry = new THREE.SphereGeometry(22, 24, 24);
-            const geometry2 = new THREE.SphereGeometry(24, 20, 20);
+            // Higher resolution sphere geometries for smoother appearance
+            const geometry = new THREE.SphereGeometry(22, 48, 48);
+            const geometry2 = new THREE.SphereGeometry(24, 40, 40);
 
             // Colors
             const brightBlue = new THREE.Color(0x1360E8);
@@ -71,7 +80,6 @@ document.addEventListener('DOMContentLoaded', function() {
             // Simplified shader with better color balance
             const material = new THREE.ShaderMaterial({
                 wireframe: true,
-                wireframeLinewidth: 0.5,
                 transparent: true,
                 uniforms: {
                     u_time: { value: 0 },
@@ -114,7 +122,6 @@ document.addEventListener('DOMContentLoaded', function() {
             // Second sphere with colors reversed
             const material2 = new THREE.ShaderMaterial({
                 wireframe: true,
-                wireframeLinewidth: 0.5,
                 transparent: true,
                 uniforms: {
                     u_time: { value: 0 },
@@ -197,20 +204,26 @@ document.addEventListener('DOMContentLoaded', function() {
                     container.style.top = '-150px';
                 }
 
-                // Reset renderer size
+                // Reset renderer size and maintain pixel ratio
                 renderer.setSize(container.clientWidth, container.clientHeight);
+                renderer.setPixelRatio(window.devicePixelRatio);
+                camera.aspect = container.clientWidth / container.clientHeight;
                 camera.updateProjectionMatrix();
             }
 
-            window.addEventListener('resize', () => {
+            // Improved resize handler
+            function onWindowResize() {
                 // Only adjust if we're not on mobile
                 if (window.innerWidth > 480) {
                     camera.aspect = container.clientWidth / container.clientHeight;
                     camera.updateProjectionMatrix();
                     renderer.setSize(container.clientWidth, container.clientHeight);
+                    renderer.setPixelRatio(window.devicePixelRatio);
                     adjustForTabletDesktop();
                 }
-            });
+            }
+
+            window.addEventListener('resize', onWindowResize);
 
             animate();
             adjustForTabletDesktop();
@@ -234,167 +247,180 @@ document.addEventListener('DOMContentLoaded', function() {
 
 
 
-
     // Initialize mobile half-sphere
-    function initMobileHalfSphere() {
+// Main function
+function initMobileHalfSphere() {
     const container = document.getElementById('mobile-sphere-animation');
-    console.log('Mobile container:', container);
     if (!container) return;
 
-    try {
-        // Debug container dimensions
-        console.log('Mobile container dimensions:', container.clientWidth, container.clientHeight);
+    // Remove background color for transparency
+    container.style.backgroundColor = 'transparent';
 
-        // Remove background color
-        container.style.backgroundColor = 'transparent';
+    // Create scene
+    mobileScene = new THREE.Scene();
 
-        // Create scene
-        mobileScene = new THREE.Scene();
+    // Create camera
+    mobileCamera = new THREE.PerspectiveCamera(75, container.clientWidth / container.clientHeight, 0.1, 1000);
+    mobileCamera.position.z = 50;
 
-        // Create camera with adjusted position
-        mobileCamera = new THREE.PerspectiveCamera(75, container.clientWidth / container.clientHeight, 0.1, 1000);
-        mobileCamera.position.z = 50; // Standard distance
+    // Create renderer with device pixel ratio
+    mobileRenderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+    mobileRenderer.setPixelRatio(window.devicePixelRatio); // Fixes pixelation!
+    mobileRenderer.setSize(container.clientWidth, container.clientHeight);
+    container.appendChild(mobileRenderer.domElement);
 
-        // Create renderer
-        mobileRenderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
-        mobileRenderer.setSize(container.clientWidth, container.clientHeight);
-        container.appendChild(mobileRenderer.domElement);
+    // Hide loader if present
+    const loader = document.getElementById('mobile-sphere-loader');
+    if (loader) loader.style.display = 'none';
 
-        // Hide loader
-        const loader = document.getElementById('mobile-sphere-loader');
-        if (loader) loader.style.display = 'none';
+    // Higher resolution sphere geometries
+    const geometry = new THREE.SphereGeometry(22, 48, 48);
+    const geometry2 = new THREE.SphereGeometry(24, 40, 40);
 
-        // Create FULL sphere geometries (not half)
-        const geometry = new THREE.SphereGeometry(22, 24, 24);
-        const geometry2 = new THREE.SphereGeometry(24, 20, 20);
+    // Colors
+    const brightBlue = new THREE.Color(0x1360E8);
+    const lavenderPurple = new THREE.Color(0xC687FF);
+    const white = new THREE.Color(0x000000);
 
-        // Colors
-        const brightBlue = new THREE.Color(0x1360E8);
-        const lavenderPurple = new THREE.Color(0xC687FF);
-        const white = new THREE.Color(0x000000);
+    // Materials (wireframe)
+    const material = new THREE.ShaderMaterial({
+        wireframe: true,
+        transparent: true,
+        uniforms: {
+            u_time: { value: 0 },
+            u_blue: { value: brightBlue },
+            u_purple: { value: lavenderPurple },
+            u_white: { value: white }
+        },
+        vertexShader: `
+            varying vec3 vPosition;
+            void main() {
+                vPosition = position;
+                gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+            }
+        `,
+        fragmentShader: `
+            uniform float u_time;
+            uniform vec3 u_blue;
+            uniform vec3 u_purple;
+            uniform vec3 u_white;
+            varying vec3 vPosition;
 
-        // Materials
-        const material = new THREE.ShaderMaterial({
-            wireframe: true,
-            wireframeLinewidth: 0.5,
-            transparent: true,
-            uniforms: {
-                u_time: { value: 0 },
-                u_blue: { value: brightBlue },
-                u_purple: { value: lavenderPurple },
-                u_white: { value: white }
-            },
-            vertexShader: `
-                varying vec3 vPosition;
-                void main() {
-                    vPosition = position;
-                    gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
-                }
-            `,
-            fragmentShader: `
-                uniform float u_time;
-                uniform vec3 u_blue;
-                uniform vec3 u_purple;
-                uniform vec3 u_white;
-                varying vec3 vPosition;
+            void main() {
+                vec3 normalizedPos = normalize(vPosition);
+                float noise1 = sin(normalizedPos.x * 5.0 + u_time) * cos(normalizedPos.y * 5.0 + u_time) * 0.5 + 0.5;
+                float noise2 = cos(normalizedPos.z * 4.0 + u_time * 0.7) * 0.5 + 0.5;
+                vec3 color = mix(u_blue, u_purple, noise1);
+                color = mix(color, u_white, noise2 * 0.3);
+                gl_FragColor = vec4(color, 0.7);
+            }
+        `
+    });
 
-                void main() {
-                    vec3 normalizedPos = normalize(vPosition);
-                    float noise1 = sin(normalizedPos.x * 5.0 + u_time) * cos(normalizedPos.y * 5.0 + u_time) * 0.5 + 0.5;
-                    float noise2 = cos(normalizedPos.z * 4.0 + u_time * 0.7) * 0.5 + 0.5;
-                    vec3 color = mix(u_blue, u_purple, noise1);
-                    color = mix(color, u_white, noise2 * 0.3);
-                    gl_FragColor = vec4(color, 0.7);
-                }
-            `
-        });
+    const material2 = new THREE.ShaderMaterial({
+        wireframe: true,
+        transparent: true,
+        uniforms: {
+            u_time: { value: 0 },
+            u_blue: { value: brightBlue },
+            u_purple: { value: lavenderPurple },
+            u_white: { value: white }
+        },
+        vertexShader: material.vertexShader,
+        fragmentShader: `
+            uniform float u_time;
+            uniform vec3 u_blue;
+            uniform vec3 u_purple;
+            uniform vec3 u_white;
+            varying vec3 vPosition;
 
-        const material2 = new THREE.ShaderMaterial({
-            wireframe: true,
-            wireframeLinewidth: 0.5,
-            transparent: true,
-            uniforms: {
-                u_time: { value: 0 },
-                u_blue: { value: brightBlue },
-                u_purple: { value: lavenderPurple },
-                u_white: { value: white }
-            },
-            vertexShader: material.vertexShader,
-            fragmentShader: `
-                uniform float u_time;
-                uniform vec3 u_blue;
-                uniform vec3 u_purple;
-                uniform vec3 u_white;
-                varying vec3 vPosition;
+            void main() {
+                vec3 normalizedPos = normalize(vPosition);
+                float noise1 = cos(normalizedPos.x * 5.0 + u_time * 0.8) * sin(normalizedPos.y * 5.0 + u_time * 0.8) * 0.5 + 0.5;
+                float noise2 = sin(normalizedPos.z * 4.0 + u_time * 0.5) * 0.5 + 0.5;
+                vec3 color = mix(u_purple, u_blue, noise1);
+                color = mix(color, u_white, noise2 * 0.25);
+                gl_FragColor = vec4(color, 0.7);
+            }
+        `
+    });
 
-                void main() {
-                    vec3 normalizedPos = normalize(vPosition);
-                    float noise1 = cos(normalizedPos.x * 5.0 + u_time * 0.8) * sin(normalizedPos.y * 5.0 + u_time * 0.8) * 0.5 + 0.5;
-                    float noise2 = sin(normalizedPos.z * 4.0 + u_time * 0.5) * 0.5 + 0.5;
-                    vec3 color = mix(u_purple, u_blue, noise1);
-                    color = mix(color, u_white, noise2 * 0.25);
-                    gl_FragColor = vec4(color, 0.7);
-                }
-            `
-        });
+    // Create meshes
+    mobileSphere = new THREE.Mesh(geometry, material);
+    mobileSphere2 = new THREE.Mesh(geometry2, material2);
 
-        // Create meshes
-        mobileSphere = new THREE.Mesh(geometry, material);
-        mobileSphere2 = new THREE.Mesh(geometry2, material2);
+    // Position spheres
+    mobileSphere.position.set(22, 0, 0);
+    mobileSphere2.position.set(22, 0, 0);
 
-        // Position sphere at right edge
-        mobileSphere.position.set(22, 0, 0);  // Radius = 22
-        mobileSphere2.position.set(22, 0, 0); // Radius = 24
+    // Add to scene
+    mobileScene.add(mobileSphere, mobileSphere2);
 
-        // Add to scene
-        mobileScene.add(mobileSphere, mobileSphere2);
+    // Animation function
+    function animateMobile() {
+        mobileAnimId = requestAnimationFrame(animateMobile);
 
-        // Remove axes helper too
-        // Animation function
-        function animateMobile() {
-            mobileAnimId = requestAnimationFrame(animateMobile);
+        // Update time
+        const time = performance.now() * 0.001;
+        material.uniforms.u_time.value = time;
+        material2.uniforms.u_time.value = time;
 
-            // Update time
-            const time = performance.now() * 0.001;
-            material.uniforms.u_time.value = time;
-            material2.uniforms.u_time.value = time;
+        // Sphere rotation
+        mobileSphere.rotation.x += 0.003;
+        mobileSphere.rotation.y += 0.004;
+        mobileSphere2.rotation.x -= 0.002;
+        mobileSphere2.rotation.y -= 0.003;
 
-            // Sphere rotation
-            mobileSphere.rotation.x += 0.003;
-            mobileSphere.rotation.y += 0.004;
-            mobileSphere2.rotation.x -= 0.002;
-            mobileSphere2.rotation.y -= 0.003;
-
-            // Render
-            mobileRenderer.render(mobileScene, mobileCamera);
-        }
-
-        // Start animation
-        animateMobile();
-        console.log('Mobile sphere animation started');
-    } catch (error) {
-        console.error('Mobile sphere error:', error);
+        // Render
+        mobileRenderer.render(mobileScene, mobileCamera);
     }
+
+    // Start animation
+    animateMobile();
+
+    // Responsive resize handler
+    function onWindowResize() {
+        if (!container || !mobileCamera || !mobileRenderer) return;
+        mobileCamera.aspect = container.clientWidth / container.clientHeight;
+        mobileCamera.updateProjectionMatrix();
+        mobileRenderer.setSize(container.clientWidth, container.clientHeight);
+        mobileRenderer.setPixelRatio(window.devicePixelRatio); // Keep it sharp on resize
+    }
+
+    window.addEventListener('resize', onWindowResize);
+
+    // Store handler for cleanup if needed
+    mobileRenderer._onResize = onWindowResize;
 }
 
 // Initialize on mobile only
 if (window.innerWidth <= 480) {
-    console.log('Mobile width detected, initializing half-sphere');
     initMobileHalfSphere();
 }
 
-// Handle resize
+// Handle resize for mobile/desktop switching
 window.addEventListener('resize', function() {
+    // If switching to mobile and not already initialized
     if (window.innerWidth <= 480 && !mobileRenderer) {
-        console.log('Resized to mobile, initializing half-sphere');
         initMobileHalfSphere();
-    } else if (window.innerWidth > 480 && mobileRenderer) {
-        console.log('Resized to desktop, removing half-sphere');
+    }
+    // If switching to desktop, clean up
+    else if (window.innerWidth > 480 && mobileRenderer) {
         cancelAnimationFrame(mobileAnimId);
-        mobileRenderer.domElement.remove();
+        if (mobileRenderer.domElement.parentNode) {
+            mobileRenderer.domElement.parentNode.removeChild(mobileRenderer.domElement);
+        }
+        if (mobileRenderer._onResize) {
+            window.removeEventListener('resize', mobileRenderer._onResize);
+        }
         mobileRenderer = null;
+        mobileScene = null;
+        mobileCamera = null;
+        mobileSphere = null;
+        mobileSphere2 = null;
     }
 });
+
 
 
 
