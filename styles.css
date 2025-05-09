@@ -1470,67 +1470,71 @@ body {
     }
 
     .plants-row {
-        bottom: -120px;
+        bottom: -90px; /* Slightly lower to allow for better depth */
     }
 
     .plant {
-        width: 200px; /* Smaller uniform width for mobile */
+        width: 320px; /* Bigger plants on mobile */
     }
 
-    /* Hide some plants on mobile to prevent overcrowding */
+    /* Hide most plants on mobile for a cleaner look */
+    .plant-2, .plant:nth-child(2),
     .plant-8, .plant:nth-child(8),
+    .plant-9, .plant:nth-child(9),
+    .plant-10, .plant:nth-child(10),
     .plant-11, .plant:nth-child(11),
-    .plant-13, .plant:nth-child(13) {
-        display: none;
-    }
-
-    /* Side plants */
-    .plant-1, .plant:nth-child(1) {
-        left: -50px;
-        bottom: -10px;
-    }
-
-    /* Transition plants */
-    .plant-6, .plant:nth-child(6) {
-        left: 100px;
-        bottom: -30px;
-    }
-
-    .plant-4, .plant:nth-child(4) {
-        right: -50px;
-        bottom: -35px;
-    }
-
-    /* Center plants */
-    .plant-7, .plant:nth-child(7) {
-        left: 250px;
-        bottom: -110px; /* Much deeper */
-    }
-
-    .plant-3, .plant:nth-child(3) {
-        right: 100px;
-        bottom: -115px; /* Much deeper */
-    }
-
-    .plant-2, .plant:nth-child(2) {
-        right: 250px;
-        bottom: -75px;
-    }
-
-    /* Additional plants */
-    .plant-9, .plant:nth-child(9) {
-        left: 30px;
-        bottom: -25px;
-    }
-
-    .plant-10, .plant:nth-child(10) {
-        right: 180px;
-        bottom: -90px;
-    }
-
     .plant-12, .plant:nth-child(12) {
-        right: 30px;
-        bottom: -120px; /* Deepest center */
+        display: none; /* Hide these plants on mobile */
+    }
+
+    /* Keep only 6 key plants visible with natural positioning */
+    /* Far left */
+    .plant-1, .plant:nth-child(1) {
+        width: 200px;
+        left: -40px;
+        bottom: -20px;
+        z-index: 3;
+    }
+
+    /* Left-center */
+    .plant-6, .plant:nth-child(6) {
+        width: 240px; /* Slightly larger */
+        left: 70px;
+        bottom: -60px; /* Lower for depth */
+        z-index: 4;
+    }
+
+    /* Center */
+    .plant-7, .plant:nth-child(7) {
+        width: 230px;
+        left: 40%;
+        transform: translateX(-50%);
+        bottom: -75px; /* Deepest for center plant */
+        z-index: 3;
+    }
+
+    /* Right-center */
+    .plant-3, .plant:nth-child(3) {
+        width: 240px; /* Slightly larger */
+        right: 70px;
+        bottom: -55px;
+        z-index: 5;
+    }
+
+    /* Far right */
+    .plant-5, .plant:nth-child(5) {
+        width: 260px; /* Largest plant */
+        right: -50px;
+        bottom: -30px;
+        z-index: 7;
+    }
+
+    /* Additional plant for balance */
+    .plant-13, .plant:nth-child(13) {
+        width: 190px; /* Smallest plant */
+        right: 10px;
+        bottom: -45px;
+        z-index: 6;
     }
 
 
