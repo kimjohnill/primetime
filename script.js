@@ -783,4 +783,131 @@ window.addEventListener('resize', () => {
 
 
 
+// =====================
+// Plants Swaying
+// =====================
+
+const plants = document.querySelectorAll('.plant');
+    let lastMouseX = null;
+    let lastMouseY = null;
+    let lastTimestamp = null;
+    let velocityX = 0;
+
+    // Store last time each plant was affected to prevent rapid re-triggering
+    const plantLastTriggered = new Array(plants.length).fill(0);
+
+    // Track mouse movement and calculate velocity
+    document.addEventListener('mousemove', function(e) {
+        const currentTime = Date.now();
+
+        if (lastMouseX !== null && lastTimestamp !== null) {
+            // Calculate time difference in seconds
+            const dt = (currentTime - lastTimestamp) / 1000;
+            if (dt > 0) { // Prevent division by zero
+                // Calculate velocity (pixels per second)
+                const dx = e.clientX - lastMouseX;
+                velocityX = dx / dt;
+
+                // Check if mouse is directly over any plants
+                plants.forEach((plant, index) => {
+                    const rect = plant.getBoundingClientRect();
+
+                    // Check if mouse is directly over this plant
+                    if (e.clientX >= rect.left && e.clientX <= rect.right &&
+                        e.clientY >= rect.top && e.clientY <= rect.bottom) {
+
+                        // Prevent rapid re-triggering (wait at least 500ms between triggers for same plant)
+                        if (currentTime - plantLastTriggered[index] > 500) {
+                            plantLastTriggered[index] = currentTime;
+
+                            // Calculate force based on velocity
+                            const velocityFactor = Math.abs(velocityX) / 1000; // Scale factor
+                            const force = Math.min(velocityFactor * 15, 15); // Cap at 15 degrees
+
+                            // Only trigger if force is meaningful
+                            if (force > 0.5) {
+                                // FIX: Direction should match mouse movement direction
+                                // When moving right to left (negative velocity), sway left first
+                                const direction = velocityX > 0 ? 1 : -1; // Same as mouse movement
+                                triggerSway(plant, force, direction);
+                            }
+                        }
+                    }
+                });
+            }
+        }
+
+        lastMouseX = e.clientX;
+        lastMouseY = e.clientY;
+        lastTimestamp = currentTime;
+    });
+
+    function triggerSway(plant, force, direction) {
+        // Add randomness to this plant
+        const randomForce = force * (0.8 + Math.random() * 0.4); // 80-120% of calculated force
+        const randomDuration = 0.9 + Math.random() * 0.2; // Random duration 0.9-1.1x
+
+        // Cancel any existing animations
+        gsap.killTweensOf(plant);
+
+        // Create damped oscillation animation based on the graph
+        const timeline = gsap.timeline();
+
+        // Initial peak - faster for stronger forces
+        timeline.to(plant, {
+            rotation: direction * randomForce,
+            duration: Math.max(0.2, randomDuration * 0.4 * (1 - randomForce/20)), // Faster for stronger forces
+            ease: "sine.out"
+        });
+
+        // First opposite peak
+        timeline.to(plant, {
+            rotation: -direction * randomForce * 0.7,
+            duration: randomDuration * 0.8,
+            ease: "sine.inOut"
+        });
+
+        // Second peak
+        timeline.to(plant, {
+            rotation: direction * randomForce * 0.5,
+            duration: randomDuration * 0.8,
+            ease: "sine.inOut"
+        });
+
+        // Third opposite peak
+        timeline.to(plant, {
+            rotation: -direction * randomForce * 0.3,
+            duration: randomDuration * 0.8,
+            ease: "sine.inOut"
+        });
+
+        // Return to center
+        timeline.to(plant, {
+            rotation: 0,
+            duration: randomDuration * 0.8,
+            ease: "sine.inOut"
+        });
+    }
+
+    // Add subtle ambient movement
+    plants.forEach((plant, index) => {
+        const delay = index * 0.3;
+
+        function ambientMovement() {
+            const randomRotation = -0.3 + Math.random() * 0.6; // -0.3 to 0.3 degrees
+            const randomDuration = 2 + Math.random() * 2; // 2-4 seconds
+
+            gsap.to(plant, {
+                rotation: randomRotation,
+                duration: randomDuration,
+                ease: "sine.inOut",
+                delay: delay,
+                onComplete: ambientMovement
+            });
+        }
+
+        ambientMovement();
+    });
+
+
 });
