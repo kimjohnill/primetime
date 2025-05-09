@@ -111,6 +111,7 @@ body {
     background-repeat: no-repeat;
     background-position: center;
     margin-left: auto;
+    margin-right:10px;
     z-index: 1001;
 }
 
@@ -1333,6 +1334,10 @@ body {
 
 /* Small mobile devices */
 @media (max-width: 480px) {
+
+  .logo {
+    margin-left: 05px;
+}
     .hero {
         padding-top: 0;
         margin-bottom: 0;
