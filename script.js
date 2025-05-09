@@ -549,94 +549,238 @@ window.addEventListener('resize', function() {
     }
 
     // Function to check if element is in viewport
-    function isElementInViewport(el) {
-        const rect = el.getBoundingClientRect();
-        return (
-            rect.top <= (window.innerHeight * 0.75) &&
-            rect.bottom >= 0
-        );
+function isElementInViewport(el) {
+    const rect = el.getBoundingClientRect();
+    return (
+        rect.top <= (window.innerHeight * 0.75) &&
+        rect.bottom >= 0
+    );
+}
+
+// Get the line elements
+const line1to2 = document.querySelector('.line-1-to-2');
+const line2to3 = document.querySelector('.line-2-to-3');
+
+// Function to check scroll position and animate lines
+function checkScroll() {
+    // First line animation trigger
+    if (isElementInViewport(document.getElementById('step-create'))) {
+        line1to2.classList.add('active');
     }
 
-    // Get the line elements
-    const line1to2 = document.querySelector('.line-1-to-2');
-    const line2to3 = document.querySelector('.line-2-to-3');
-
-    // Function to check scroll position and animate lines
-    function checkScroll() {
-        // First line animation trigger
-        if (isElementInViewport(document.getElementById('step-create'))) {
-            line1to2.classList.add('active');
-        }
-
-        // Second line animation trigger
-        if (isElementInViewport(document.getElementById('step-deliver'))) {
-            line2to3.classList.add('active');
-        }
+    // Second line animation trigger
+    if (isElementInViewport(document.getElementById('step-deliver'))) {
+        line2to3.classList.add('active');
     }
+}
 
-    // Check on scroll
-    window.addEventListener('scroll', checkScroll);
+// Check on scroll
+window.addEventListener('scroll', checkScroll);
 
-    // Initial check
-    checkScroll();
+// Initial check
+checkScroll();
 
-    // =====================
-    // Scrolling lines
-    // =====================
-    // Register ScrollTrigger plugin
-    gsap.registerPlugin(ScrollTrigger);
 
-    // Get SVG paths
-    const path1 = document.querySelector('.path-1-to-2');
-    const path2 = document.querySelector('.path-2-to-3');
 
-    // Set up path lengths
-    const path1Length = path1.getTotalLength();
-    const path2Length = path2.getTotalLength();
 
-    // Set initial state - invisible paths
-    gsap.set(path1, {
-        strokeDasharray: path1Length,
-        strokeDashoffset: path1Length
-    });
 
-    gsap.set(path2, {
-        strokeDasharray: path2Length,
-        strokeDashoffset: path2Length
-    });
 
-    // Create animation for first path
-    gsap.to(path1, {
-        strokeDashoffset: 0,
-        duration: 1,
+// =====================
+// Scrolling lines
+// =====================
+// Register ScrollTrigger plugin
+gsap.registerPlugin(ScrollTrigger);
+
+// Get SVG paths
+const path1 = document.querySelector('.path-1-to-2');
+const path2 = document.querySelector('.path-2-to-3');
+
+// Get the SVG container
+const svg = document.querySelector('svg.connector-lines');
+
+// Get the path1 points
+const path1Start = path1.getPointAtLength(0);
+const path1End = path1.getPointAtLength(path1.getTotalLength());
+
+// Get the original path2 start point
+const originalPath2Start = path2.getPointAtLength(0);
+
+// Create a completely new path definition for path2
+// This ensures it ends exactly at the x-coordinate of path1Start
+// But starts at its original y-position below the middle circle
+const path2StartX = originalPath2Start.x; // Keep original X
+const path2StartY = originalPath2Start.y; // Keep original Y
+const path2EndY = path2.getPointAtLength(path2.getTotalLength()).y;
+
+// Create a new path definition: start at original position, go down, then left to align with path1Start
+const newPath2Data = `M ${path2StartX},${path2StartY} V ${path2EndY} H ${path1Start.x}`;
+path2.setAttribute('d', newPath2Data);
+
+// Now get the updated path length and end point
+const path2Length = path2.getTotalLength();
+const path2End = path2.getPointAtLength(path2Length);
+
+// Set initial state - invisible paths
+gsap.set(path1, {
+    strokeDasharray: path1.getTotalLength(),
+    strokeDashoffset: path1.getTotalLength()
+});
+
+gsap.set(path2, {
+    strokeDasharray: path2Length,
+    strokeDashoffset: path2Length
+});
+
+// Create circles at path points
+function createCircle(id, x, y, radius, fill, opacity) {
+    const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+    circle.setAttribute("id", id);
+    circle.setAttribute("cx", x);
+    circle.setAttribute("cy", y);
+    circle.setAttribute("r", radius);
+    circle.setAttribute("fill", fill);
+    circle.setAttribute("opacity", opacity);
+    svg.appendChild(circle);
+    return circle;
+}
+
+// Create fixed circles - initially invisible (opacity 0)
+const startCircle = createCircle("start-circle", path1Start.x, path1Start.y, 5, "#000000", 0);
+const middleCircle = createCircle("middle-circle", path1End.x, path1End.y, 5, "#000000", 0);
+const endCircle = createCircle("end-circle", path1Start.x, path2End.y, 5, "#000000", 0); // Using path1Start.x to align
+
+// Create radiating circles - initially invisible (opacity 0)
+const startRadiating = createCircle("start-radiating", path1Start.x, path1Start.y, 5, "#000000", 0);
+const middleRadiating = createCircle("middle-radiating", path1End.x, path1End.y, 5, "#000000", 0);
+const endRadiating = createCircle("end-radiating", path1Start.x, path2End.y, 5, "#000000", 0); // Using path1Start.x to align
+
+// Create radiating animation for each circle (initially paused)
+function createRadiatingAnimation(circle) {
+    return gsap.timeline({repeat: -1, paused: true})
+        .to(circle, {
+            attr: {r: 15},
+            opacity: 0,
+            duration: 1.5,
+            ease: "sine.out"
+        })
+        .set(circle, {
+            attr: {r: 5},
+            opacity: 0.8
+        });
+}
+
+// Create the radiating animations (paused initially)
+const startRadiatingAnim = createRadiatingAnimation(startRadiating);
+const middleRadiatingAnim = createRadiatingAnimation(middleRadiating);
+const endRadiatingAnim = createRadiatingAnimation(endRadiating);
+
+// Function to fade in a circle and start its radiating animation
+function fadeInCircle(circle, radiatingCircle, radiatingAnim) {
+    gsap.to(circle, {
+        opacity: 1,
+        duration: 0.5,
         ease: "power2.out",
-        scrollTrigger: {
-            trigger: "#step-create",
-            start: "top 80%",
-            end: "top 30%",
-            scrub: 0.5,
-            // markers: true, // Uncomment for debugging
-            id: "path1"
+        onComplete: () => {
+            gsap.set(radiatingCircle, { opacity: 0.8 });
+            radiatingAnim.play();
         }
     });
+}
 
-    // Create animation for second path
-    gsap.to(path2, {
-        strokeDashoffset: 0,
-        duration: 1,
-        ease: "power2.out",
-        scrollTrigger: {
-            trigger: "#step-deliver",
-            start: "top 80%",
-            end: "top 30%",
-            scrub: 0.5,
-            // markers: true, // Uncomment for debugging
-            id: "path2"
+// Improved function to completely fade out both circles
+function fadeOutCircle(circle, radiatingCircle, radiatingAnim) {
+    radiatingAnim.pause();
+
+    gsap.to([circle, radiatingCircle], {
+        opacity: 0,
+        duration: 0.5,
+        ease: "power2.in",
+        onComplete: () => {
+            gsap.set([circle, radiatingCircle], { opacity: 0 });
         }
     });
+}
 
-    // Refresh ScrollTrigger when window resizes
-    window.addEventListener('resize', () => {
-        ScrollTrigger.refresh();
-    });
+// Create animation for first path
+gsap.to(path1, {
+    strokeDashoffset: 0,
+    duration: 1,
+    ease: "power2.out",
+    scrollTrigger: {
+        trigger: "#step-create",
+        start: "top 80%",
+        end: "+=250",
+        scrub: 0.5,
+        markers: false,
+        id: "path1"
+    }
+});
+
+// Create animation for second path
+gsap.to(path2, {
+    strokeDashoffset: 0,
+    duration: 1,
+    ease: "power2.out",
+    scrollTrigger: {
+        trigger: "#step-deliver",
+        start: "top 80%",
+        end: "+=250",
+        scrub: 0.5,
+        markers: false,
+        id: "path2"
+    }
+});
+
+// Independent ScrollTrigger for start circle
+ScrollTrigger.create({
+    trigger: "#step-create",
+    start: "top 80%",
+    end: "+=50", // Short range to make it appear quickly
+    scrub: true,
+    id: "start-circle-control",
+    onEnter: () => {
+        fadeInCircle(startCircle, startRadiating, startRadiatingAnim);
+    },
+    onLeaveBack: () => {
+        fadeOutCircle(startCircle, startRadiating, startRadiatingAnim);
+    }
+});
+
+// Independent ScrollTrigger for middle circle
+ScrollTrigger.create({
+    trigger: "#step-create",
+    start: "top 50%", // Appears when we're halfway through the first section
+    end: "+=50",
+    scrub: true,
+    id: "middle-circle-control",
+    onEnter: () => {
+        fadeInCircle(middleCircle, middleRadiating, middleRadiatingAnim);
+    },
+    onLeaveBack: () => {
+        fadeOutCircle(middleCircle, middleRadiating, middleRadiatingAnim);
+    }
+});
+
+// Independent ScrollTrigger for end circle
+ScrollTrigger.create({
+    trigger: "#step-deliver",
+    start: "top 50%", // Appears when we're halfway through the second section
+    end: "+=50",
+    scrub: true,
+    id: "end-circle-control",
+    onEnter: () => {
+        fadeInCircle(endCircle, endRadiating, endRadiatingAnim);
+    },
+    onLeaveBack: () => {
+        fadeOutCircle(endCircle, endRadiating, endRadiatingAnim);
+    }
+});
+
+// Refresh ScrollTrigger when window resizes
+window.addEventListener('resize', () => {
+    ScrollTrigger.refresh();
+});
+
+
+
 });
