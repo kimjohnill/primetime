@@ -1,3 +1,4 @@
+// Main document ready function
 document.addEventListener('DOMContentLoaded', function() {
     // Hamburger menu functionality
     const hamburgerIcon = document.querySelector('.hamburger-icon');
@@ -22,13 +23,6 @@ document.addEventListener('DOMContentLoaded', function() {
             mobileMenu.classList.remove('active');
         }
     });
-
-
-
-
-
-
-
 
     // Mobile sphere variables - declare at the top
     var mobileScene = null;
@@ -227,7 +221,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
             animate();
             adjustForTabletDesktop();
-
             console.log('Desktop Three.js sphere animation initialized successfully');
         } catch (error) {
             console.error('Error initializing Three.js sphere:', error);
@@ -240,196 +233,179 @@ document.addEventListener('DOMContentLoaded', function() {
         console.error('Sphere animation container not found');
     }
 
-
-
-
-
-
-
-
     // Initialize mobile half-sphere
-// Main function
-function initMobileHalfSphere() {
-    const container = document.getElementById('mobile-sphere-animation');
-    if (!container) return;
+    // Main function
+    function initMobileHalfSphere() {
+        const container = document.getElementById('mobile-sphere-animation');
+        if (!container) return;
 
-    // Remove background color for transparency
-    container.style.backgroundColor = 'transparent';
+        // Remove background color for transparency
+        container.style.backgroundColor = 'transparent';
 
-    // Create scene
-    mobileScene = new THREE.Scene();
+        // Create scene
+        mobileScene = new THREE.Scene();
 
-    // Create camera
-    mobileCamera = new THREE.PerspectiveCamera(75, container.clientWidth / container.clientHeight, 0.1, 1000);
-    mobileCamera.position.z = 50;
+        // Create camera
+        mobileCamera = new THREE.PerspectiveCamera(75, container.clientWidth / container.clientHeight, 0.1, 1000);
+        mobileCamera.position.z = 50;
 
-    // Create renderer with device pixel ratio
-    mobileRenderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
-    mobileRenderer.setPixelRatio(window.devicePixelRatio); // Fixes pixelation!
-    mobileRenderer.setSize(container.clientWidth, container.clientHeight);
-    container.appendChild(mobileRenderer.domElement);
-
-    // Hide loader if present
-    const loader = document.getElementById('mobile-sphere-loader');
-    if (loader) loader.style.display = 'none';
-
-    // Higher resolution sphere geometries
-    const geometry = new THREE.SphereGeometry(22, 48, 48);
-    const geometry2 = new THREE.SphereGeometry(24, 40, 40);
-
-    // Colors
-    const brightBlue = new THREE.Color(0x1360E8);
-    const lavenderPurple = new THREE.Color(0xC687FF);
-    const white = new THREE.Color(0x000000);
-
-    // Materials (wireframe)
-    const material = new THREE.ShaderMaterial({
-        wireframe: true,
-        transparent: true,
-        uniforms: {
-            u_time: { value: 0 },
-            u_blue: { value: brightBlue },
-            u_purple: { value: lavenderPurple },
-            u_white: { value: white }
-        },
-        vertexShader: `
-            varying vec3 vPosition;
-            void main() {
-                vPosition = position;
-                gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
-            }
-        `,
-        fragmentShader: `
-            uniform float u_time;
-            uniform vec3 u_blue;
-            uniform vec3 u_purple;
-            uniform vec3 u_white;
-            varying vec3 vPosition;
-
-            void main() {
-                vec3 normalizedPos = normalize(vPosition);
-                float noise1 = sin(normalizedPos.x * 5.0 + u_time) * cos(normalizedPos.y * 5.0 + u_time) * 0.5 + 0.5;
-                float noise2 = cos(normalizedPos.z * 4.0 + u_time * 0.7) * 0.5 + 0.5;
-                vec3 color = mix(u_blue, u_purple, noise1);
-                color = mix(color, u_white, noise2 * 0.3);
-                gl_FragColor = vec4(color, 0.7);
-            }
-        `
-    });
-
-    const material2 = new THREE.ShaderMaterial({
-        wireframe: true,
-        transparent: true,
-        uniforms: {
-            u_time: { value: 0 },
-            u_blue: { value: brightBlue },
-            u_purple: { value: lavenderPurple },
-            u_white: { value: white }
-        },
-        vertexShader: material.vertexShader,
-        fragmentShader: `
-            uniform float u_time;
-            uniform vec3 u_blue;
-            uniform vec3 u_purple;
-            uniform vec3 u_white;
-            varying vec3 vPosition;
-
-            void main() {
-                vec3 normalizedPos = normalize(vPosition);
-                float noise1 = cos(normalizedPos.x * 5.0 + u_time * 0.8) * sin(normalizedPos.y * 5.0 + u_time * 0.8) * 0.5 + 0.5;
-                float noise2 = sin(normalizedPos.z * 4.0 + u_time * 0.5) * 0.5 + 0.5;
-                vec3 color = mix(u_purple, u_blue, noise1);
-                color = mix(color, u_white, noise2 * 0.25);
-                gl_FragColor = vec4(color, 0.7);
-            }
-        `
-    });
-
-    // Create meshes
-    mobileSphere = new THREE.Mesh(geometry, material);
-    mobileSphere2 = new THREE.Mesh(geometry2, material2);
-
-    // Position spheres
-    mobileSphere.position.set(22, 0, 0);
-    mobileSphere2.position.set(22, 0, 0);
-
-    // Add to scene
-    mobileScene.add(mobileSphere, mobileSphere2);
-
-    // Animation function
-    function animateMobile() {
-        mobileAnimId = requestAnimationFrame(animateMobile);
-
-        // Update time
-        const time = performance.now() * 0.001;
-        material.uniforms.u_time.value = time;
-        material2.uniforms.u_time.value = time;
-
-        // Sphere rotation
-        mobileSphere.rotation.x += 0.003;
-        mobileSphere.rotation.y += 0.004;
-        mobileSphere2.rotation.x -= 0.002;
-        mobileSphere2.rotation.y -= 0.003;
-
-        // Render
-        mobileRenderer.render(mobileScene, mobileCamera);
-    }
-
-    // Start animation
-    animateMobile();
-
-    // Responsive resize handler
-    function onWindowResize() {
-        if (!container || !mobileCamera || !mobileRenderer) return;
-        mobileCamera.aspect = container.clientWidth / container.clientHeight;
-        mobileCamera.updateProjectionMatrix();
+        // Create renderer with device pixel ratio
+        mobileRenderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+        mobileRenderer.setPixelRatio(window.devicePixelRatio); // Fixes pixelation!
         mobileRenderer.setSize(container.clientWidth, container.clientHeight);
-        mobileRenderer.setPixelRatio(window.devicePixelRatio); // Keep it sharp on resize
+        container.appendChild(mobileRenderer.domElement);
+
+        // Hide loader if present
+        const loader = document.getElementById('mobile-sphere-loader');
+        if (loader) loader.style.display = 'none';
+
+        // Higher resolution sphere geometries
+        const geometry = new THREE.SphereGeometry(22, 48, 48);
+        const geometry2 = new THREE.SphereGeometry(24, 40, 40);
+
+        // Colors
+        const brightBlue = new THREE.Color(0x1360E8);
+        const lavenderPurple = new THREE.Color(0xC687FF);
+        const white = new THREE.Color(0x000000);
+
+        // Materials (wireframe)
+        const material = new THREE.ShaderMaterial({
+            wireframe: true,
+            transparent: true,
+            uniforms: {
+                u_time: { value: 0 },
+                u_blue: { value: brightBlue },
+                u_purple: { value: lavenderPurple },
+                u_white: { value: white }
+            },
+            vertexShader: `
+                varying vec3 vPosition;
+                void main() {
+                    vPosition = position;
+                    gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+                }
+            `,
+            fragmentShader: `
+                uniform float u_time;
+                uniform vec3 u_blue;
+                uniform vec3 u_purple;
+                uniform vec3 u_white;
+                varying vec3 vPosition;
+
+                void main() {
+                    vec3 normalizedPos = normalize(vPosition);
+                    float noise1 = sin(normalizedPos.x * 5.0 + u_time) * cos(normalizedPos.y * 5.0 + u_time) * 0.5 + 0.5;
+                    float noise2 = cos(normalizedPos.z * 4.0 + u_time * 0.7) * 0.5 + 0.5;
+                    vec3 color = mix(u_blue, u_purple, noise1);
+                    color = mix(color, u_white, noise2 * 0.3);
+                    gl_FragColor = vec4(color, 0.7);
+                }
+            `
+        });
+
+        const material2 = new THREE.ShaderMaterial({
+            wireframe: true,
+            transparent: true,
+            uniforms: {
+                u_time: { value: 0 },
+                u_blue: { value: brightBlue },
+                u_purple: { value: lavenderPurple },
+                u_white: { value: white }
+            },
+            vertexShader: material.vertexShader,
+            fragmentShader: `
+                uniform float u_time;
+                uniform vec3 u_blue;
+                uniform vec3 u_purple;
+                uniform vec3 u_white;
+                varying vec3 vPosition;
+
+                void main() {
+                    vec3 normalizedPos = normalize(vPosition);
+                    float noise1 = cos(normalizedPos.x * 5.0 + u_time * 0.8) * sin(normalizedPos.y * 5.0 + u_time * 0.8) * 0.5 + 0.5;
+                    float noise2 = sin(normalizedPos.z * 4.0 + u_time * 0.5) * 0.5 + 0.5;
+                    vec3 color = mix(u_purple, u_blue, noise1);
+                    color = mix(color, u_white, noise2 * 0.25);
+                    gl_FragColor = vec4(color, 0.7);
+                }
+            `
+        });
+
+        // Create meshes
+        mobileSphere = new THREE.Mesh(geometry, material);
+        mobileSphere2 = new THREE.Mesh(geometry2, material2);
+
+        // Position spheres
+        mobileSphere.position.set(22, 0, 0);
+        mobileSphere2.position.set(22, 0, 0);
+
+        // Add to scene
+        mobileScene.add(mobileSphere, mobileSphere2);
+
+        // Animation function
+        function animateMobile() {
+            mobileAnimId = requestAnimationFrame(animateMobile);
+
+            // Update time
+            const time = performance.now() * 0.001;
+            material.uniforms.u_time.value = time;
+            material2.uniforms.u_time.value = time;
+
+            // Sphere rotation
+            mobileSphere.rotation.x += 0.003;
+            mobileSphere.rotation.y += 0.004;
+            mobileSphere2.rotation.x -= 0.002;
+            mobileSphere2.rotation.y -= 0.003;
+
+            // Render
+            mobileRenderer.render(mobileScene, mobileCamera);
+        }
+
+        // Start animation
+        animateMobile();
+
+        // Responsive resize handler
+        function onWindowResize() {
+            if (!container || !mobileCamera || !mobileRenderer) return;
+            mobileCamera.aspect = container.clientWidth / container.clientHeight;
+            mobileCamera.updateProjectionMatrix();
+            mobileRenderer.setSize(container.clientWidth, container.clientHeight);
+            mobileRenderer.setPixelRatio(window.devicePixelRatio); // Keep it sharp on resize
+        }
+
+        window.addEventListener('resize', onWindowResize);
+
+        // Store handler for cleanup if needed
+        mobileRenderer._onResize = onWindowResize;
     }
 
-    window.addEventListener('resize', onWindowResize);
-
-    // Store handler for cleanup if needed
-    mobileRenderer._onResize = onWindowResize;
-}
-
-// Initialize on mobile only
-if (window.innerWidth <= 480) {
-    initMobileHalfSphere();
-}
-
-// Handle resize for mobile/desktop switching
-window.addEventListener('resize', function() {
-    // If switching to mobile and not already initialized
-    if (window.innerWidth <= 480 && !mobileRenderer) {
+    // Initialize on mobile only
+    if (window.innerWidth <= 480) {
         initMobileHalfSphere();
     }
-    // If switching to desktop, clean up
-    else if (window.innerWidth > 480 && mobileRenderer) {
-        cancelAnimationFrame(mobileAnimId);
-        if (mobileRenderer.domElement.parentNode) {
-            mobileRenderer.domElement.parentNode.removeChild(mobileRenderer.domElement);
+
+    // Handle resize for mobile/desktop switching
+    window.addEventListener('resize', function() {
+        // If switching to mobile and not already initialized
+        if (window.innerWidth <= 480 && !mobileRenderer) {
+            initMobileHalfSphere();
         }
-        if (mobileRenderer._onResize) {
-            window.removeEventListener('resize', mobileRenderer._onResize);
+        // If switching to desktop, clean up
+        else if (window.innerWidth > 480 && mobileRenderer) {
+            cancelAnimationFrame(mobileAnimId);
+            if (mobileRenderer.domElement.parentNode) {
+                mobileRenderer.domElement.parentNode.removeChild(mobileRenderer.domElement);
+            }
+            if (mobileRenderer._onResize) {
+                window.removeEventListener('resize', mobileRenderer._onResize);
+            }
+            mobileRenderer = null;
+            mobileScene = null;
+            mobileCamera = null;
+            mobileSphere = null;
+            mobileSphere2 = null;
         }
-        mobileRenderer = null;
-        mobileScene = null;
-        mobileCamera = null;
-        mobileSphere = null;
-        mobileSphere2 = null;
-    }
-});
-
-
-
-
-
-
-
-
-
-
+    });
 
     // SERVICE CARD HOVER EFFECT
     // Enhanced card hover effect with slower expansion and subtle lingering on exit
@@ -549,365 +525,306 @@ window.addEventListener('resize', function() {
     }
 
     // Function to check if element is in viewport
-function isElementInViewport(el) {
-    const rect = el.getBoundingClientRect();
-    return (
-        rect.top <= (window.innerHeight * 0.75) &&
-        rect.bottom >= 0
-    );
-}
-
-// Get the line elements
-const line1to2 = document.querySelector('.line-1-to-2');
-const line2to3 = document.querySelector('.line-2-to-3');
-
-// Function to check scroll position and animate lines
-function checkScroll() {
-    // First line animation trigger
-    if (isElementInViewport(document.getElementById('step-create'))) {
-        line1to2.classList.add('active');
+    function isElementInViewport(el) {
+        const rect = el.getBoundingClientRect();
+        return (
+            rect.top <= (window.innerHeight * 0.75) &&
+            rect.bottom >= 0
+        );
     }
 
-    // Second line animation trigger
-    if (isElementInViewport(document.getElementById('step-deliver'))) {
-        line2to3.classList.add('active');
-    }
-}
+    // Get the line elements
+    const line1to2 = document.querySelector('.line-1-to-2');
+    const line2to3 = document.querySelector('.line-2-to-3');
 
-// Check on scroll
-window.addEventListener('scroll', checkScroll);
-
-// Initial check
-checkScroll();
-
-
-
-
-
-
-// =====================
-// Scrolling lines
-// =====================
-// Register ScrollTrigger plugin
-gsap.registerPlugin(ScrollTrigger);
-
-// Get SVG paths
-const path1 = document.querySelector('.path-1-to-2');
-const path2 = document.querySelector('.path-2-to-3');
-
-// Get the SVG container
-const svg = document.querySelector('svg.connector-lines');
-
-// Get the path1 points
-const path1Start = path1.getPointAtLength(0);
-const path1End = path1.getPointAtLength(path1.getTotalLength());
-
-// Get the original path2 start point
-const originalPath2Start = path2.getPointAtLength(0);
-
-// Create a completely new path definition for path2
-// This ensures it ends exactly at the x-coordinate of path1Start
-// But starts at its original y-position below the middle circle
-const path2StartX = originalPath2Start.x; // Keep original X
-const path2StartY = originalPath2Start.y; // Keep original Y
-const path2EndY = path2.getPointAtLength(path2.getTotalLength()).y;
-
-// Create a new path definition: start at original position, go down, then left to align with path1Start
-const newPath2Data = `M ${path2StartX},${path2StartY} V ${path2EndY} H ${path1Start.x}`;
-path2.setAttribute('d', newPath2Data);
-
-// Now get the updated path length and end point
-const path2Length = path2.getTotalLength();
-const path2End = path2.getPointAtLength(path2Length);
-
-// Set initial state - invisible paths
-gsap.set(path1, {
-    strokeDasharray: path1.getTotalLength(),
-    strokeDashoffset: path1.getTotalLength()
-});
-
-gsap.set(path2, {
-    strokeDasharray: path2Length,
-    strokeDashoffset: path2Length
-});
-
-// Create circles at path points
-function createCircle(id, x, y, radius, fill, opacity) {
-    const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
-    circle.setAttribute("id", id);
-    circle.setAttribute("cx", x);
-    circle.setAttribute("cy", y);
-    circle.setAttribute("r", radius);
-    circle.setAttribute("fill", fill);
-    circle.setAttribute("opacity", opacity);
-    svg.appendChild(circle);
-    return circle;
-}
-
-// Create fixed circles - initially invisible (opacity 0)
-const startCircle = createCircle("start-circle", path1Start.x, path1Start.y, 5, "#000000", 0);
-const middleCircle = createCircle("middle-circle", path1End.x, path1End.y, 5, "#000000", 0);
-const endCircle = createCircle("end-circle", path1Start.x, path2End.y, 5, "#000000", 0); // Using path1Start.x to align
-
-// Create radiating circles - initially invisible (opacity 0)
-const startRadiating = createCircle("start-radiating", path1Start.x, path1Start.y, 5, "#000000", 0);
-const middleRadiating = createCircle("middle-radiating", path1End.x, path1End.y, 5, "#000000", 0);
-const endRadiating = createCircle("end-radiating", path1Start.x, path2End.y, 5, "#000000", 0); // Using path1Start.x to align
-
-// Create radiating animation for each circle (initially paused)
-function createRadiatingAnimation(circle) {
-    return gsap.timeline({repeat: -1, paused: true})
-        .to(circle, {
-            attr: {r: 15},
-            opacity: 0,
-            duration: 1.5,
-            ease: "sine.out"
-        })
-        .set(circle, {
-            attr: {r: 5},
-            opacity: 0.8
-        });
-}
-
-// Create the radiating animations (paused initially)
-const startRadiatingAnim = createRadiatingAnimation(startRadiating);
-const middleRadiatingAnim = createRadiatingAnimation(middleRadiating);
-const endRadiatingAnim = createRadiatingAnimation(endRadiating);
-
-// Function to fade in a circle and start its radiating animation
-function fadeInCircle(circle, radiatingCircle, radiatingAnim) {
-    gsap.to(circle, {
-        opacity: 1,
-        duration: 0.5,
-        ease: "power2.out",
-        onComplete: () => {
-            gsap.set(radiatingCircle, { opacity: 0.8 });
-            radiatingAnim.play();
+    // Function to check scroll position and animate lines
+    function checkScroll() {
+        // First line animation trigger
+        if (line1to2 && isElementInViewport(document.getElementById('step-create'))) {
+            line1to2.classList.add('active');
         }
-    });
-}
 
-// Improved function to completely fade out both circles
-function fadeOutCircle(circle, radiatingCircle, radiatingAnim) {
-    radiatingAnim.pause();
-
-    gsap.to([circle, radiatingCircle], {
-        opacity: 0,
-        duration: 0.5,
-        ease: "power2.in",
-        onComplete: () => {
-            gsap.set([circle, radiatingCircle], { opacity: 0 });
+        // Second line animation trigger
+        if (line2to3 && isElementInViewport(document.getElementById('step-deliver'))) {
+            line2to3.classList.add('active');
         }
-    });
-}
-
-// Create animation for first path
-gsap.to(path1, {
-    strokeDashoffset: 0,
-    duration: 1,
-    ease: "power2.out",
-    scrollTrigger: {
-        trigger: "#step-create",
-        start: "top 80%",
-        end: "+=250",
-        scrub: 0.5,
-        markers: false,
-        id: "path1"
     }
-});
 
-// Create animation for second path
-gsap.to(path2, {
-    strokeDashoffset: 0,
-    duration: 1,
-    ease: "power2.out",
-    scrollTrigger: {
-        trigger: "#step-deliver",
-        start: "top 80%",
-        end: "+=250",
-        scrub: 0.5,
-        markers: false,
-        id: "path2"
-    }
-});
+    // Check on scroll
+    window.addEventListener('scroll', checkScroll);
 
-// Independent ScrollTrigger for start circle
-ScrollTrigger.create({
-    trigger: "#step-create",
-    start: "top 80%",
-    end: "+=50", // Short range to make it appear quickly
-    scrub: true,
-    id: "start-circle-control",
-    onEnter: () => {
-        fadeInCircle(startCircle, startRadiating, startRadiatingAnim);
-    },
-    onLeaveBack: () => {
-        fadeOutCircle(startCircle, startRadiating, startRadiatingAnim);
-    }
-});
+    // Initial check
+    checkScroll();
 
-// Independent ScrollTrigger for middle circle
-ScrollTrigger.create({
-    trigger: "#step-create",
-    start: "top 50%", // Appears when we're halfway through the first section
-    end: "+=50",
-    scrub: true,
-    id: "middle-circle-control",
-    onEnter: () => {
-        fadeInCircle(middleCircle, middleRadiating, middleRadiatingAnim);
-    },
-    onLeaveBack: () => {
-        fadeOutCircle(middleCircle, middleRadiating, middleRadiatingAnim);
-    }
-});
+    // =====================
+    // Scrolling lines
+    // =====================
+    // Register ScrollTrigger plugin if available
+    if (typeof gsap !== 'undefined' && typeof ScrollTrigger !== 'undefined') {
+        gsap.registerPlugin(ScrollTrigger);
 
-// Independent ScrollTrigger for end circle
-ScrollTrigger.create({
-    trigger: "#step-deliver",
-    start: "top 50%", // Appears when we're halfway through the second section
-    end: "+=50",
-    scrub: true,
-    id: "end-circle-control",
-    onEnter: () => {
-        fadeInCircle(endCircle, endRadiating, endRadiatingAnim);
-    },
-    onLeaveBack: () => {
-        fadeOutCircle(endCircle, endRadiating, endRadiatingAnim);
-    }
-});
+        // Get SVG paths
+        const path1 = document.querySelector('.path-1-to-2');
+        const path2 = document.querySelector('.path-2-to-3');
 
-// Refresh ScrollTrigger when window resizes
-window.addEventListener('resize', () => {
-    ScrollTrigger.refresh();
-});
+        if (path1 && path2) {
+            // Get the SVG container
+            const svg = document.querySelector('svg.connector-lines');
 
+            if (svg) {
+                // Get the path1 points
+                const path1Start = path1.getPointAtLength(0);
+                const path1End = path1.getPointAtLength(path1.getTotalLength());
 
+                // Get the original path2 start point
+                const originalPath2Start = path2.getPointAtLength(0);
 
-// =====================
-// Plants Swaying
-// =====================
+                // Create a completely new path definition for path2
+                // This ensures it ends exactly at the x-coordinate of path1Start
+                // But starts at its original y-position below the middle circle
+                const path2StartX = originalPath2Start.x; // Keep original X
+                const path2StartY = originalPath2Start.y; // Keep original Y
+                const path2EndY = path2.getPointAtLength(path2.getTotalLength()).y;
 
-const plants = document.querySelectorAll('.plant');
-    let lastMouseX = null;
-    let lastMouseY = null;
-    let lastTimestamp = null;
-    let velocityX = 0;
+                // Create a new path definition: start at original position, go down, then left to align with path1Start
+                const newPath2Data = `M ${path2StartX},${path2StartY} V ${path2EndY} H ${path1Start.x}`;
+                path2.setAttribute('d', newPath2Data);
 
-    // Store last time each plant was affected to prevent rapid re-triggering
-    const plantLastTriggered = new Array(plants.length).fill(0);
+                // Now get the updated path length and end point
+                const path2Length = path2.getTotalLength();
+                const path2End = path2.getPointAtLength(path2Length);
 
-    // Track mouse movement and calculate velocity
-    document.addEventListener('mousemove', function(e) {
-        const currentTime = Date.now();
+                // Set initial state - invisible paths
+                gsap.set(path1, {
+                    strokeDasharray: path1.getTotalLength(),
+                    strokeDashoffset: path1.getTotalLength()
+                });
 
-        if (lastMouseX !== null && lastTimestamp !== null) {
-            // Calculate time difference in seconds
-            const dt = (currentTime - lastTimestamp) / 1000;
-            if (dt > 0) { // Prevent division by zero
-                // Calculate velocity (pixels per second)
-                const dx = e.clientX - lastMouseX;
-                velocityX = dx / dt;
+                gsap.set(path2, {
+                    strokeDasharray: path2Length,
+                    strokeDashoffset: path2Length
+                });
 
-                // Check if mouse is directly over any plants
-                plants.forEach((plant, index) => {
-                    const rect = plant.getBoundingClientRect();
+                // Create circles at path points
+                function createCircle(id, x, y, radius, fill, opacity) {
+                    const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+                    circle.setAttribute("id", id);
+                    circle.setAttribute("cx", x);
+                    circle.setAttribute("cy", y);
+                    circle.setAttribute("r", radius);
+                    circle.setAttribute("fill", fill);
+                    circle.setAttribute("opacity", opacity);
+                    svg.appendChild(circle);
+                    return circle;
+                }
 
-                    // Check if mouse is directly over this plant
-                    if (e.clientX >= rect.left && e.clientX <= rect.right &&
-                        e.clientY >= rect.top && e.clientY <= rect.bottom) {
+                // Create fixed circles - initially invisible (opacity 0)
+                const startCircle = createCircle("start-circle", path1Start.x, path1Start.y, 5, "#000000", 0);
+                const middleCircle = createCircle("middle-circle", path1End.x, path1End.y, 5, "#000000", 0);
+                const endCircle = createCircle("end-circle", path1Start.x, path2End.y, 5, "#000000", 0); // Using path1Start.x to align
 
-                        // Prevent rapid re-triggering (wait at least 500ms between triggers for same plant)
-                        if (currentTime - plantLastTriggered[index] > 500) {
-                            plantLastTriggered[index] = currentTime;
+                // Create radiating circles - initially invisible (opacity 0)
+                const startRadiating = createCircle("start-radiating", path1Start.x, path1Start.y, 5, "#000000", 0);
+                const middleRadiating = createCircle("middle-radiating", path1End.x, path1End.y, 5, "#000000", 0);
+                const endRadiating = createCircle("end-radiating", path1Start.x, path2End.y, 5, "#000000", 0); // Using path1Start.x to align
 
-                            // Calculate force based on velocity
-                            const velocityFactor = Math.abs(velocityX) / 1000; // Scale factor
-                            const force = Math.min(velocityFactor * 15, 15); // Cap at 15 degrees
+                // Create radiating animation for each circle (initially paused)
+                function createRadiatingAnimation(circle) {
+                    return gsap.timeline({repeat: -1, paused: true})
+                        .to(circle, {
+                            attr: {r: 15},
+                            opacity: 0,
+                            duration: 1.5,
+                            ease: "sine.out"
+                        })
+                        .set(circle, {
+                            attr: {r: 5},
+                            opacity: 0.8
+                        });
+                }
 
-                            // Only trigger if force is meaningful
-                            if (force > 0.5) {
-                                // FIX: Direction should match mouse movement direction
-                                // When moving right to left (negative velocity), sway left first
-                                const direction = velocityX > 0 ? 1 : -1; // Same as mouse movement
-                                triggerSway(plant, force, direction);
-                            }
+                // Create the radiating animations (paused initially)
+                const startRadiatingAnim = createRadiatingAnimation(startRadiating);
+                const middleRadiatingAnim = createRadiatingAnimation(middleRadiating);
+                const endRadiatingAnim = createRadiatingAnimation(endRadiating);
+
+                // Function to fade in a circle and start its radiating animation
+                function fadeInCircle(circle, radiatingCircle, radiatingAnim) {
+                    gsap.to(circle, {
+                        opacity: 1,
+                        duration: 0.5,
+                        ease: "power2.out",
+                        onComplete: () => {
+                            gsap.set(radiatingCircle, { opacity: 0.8 });
+                            radiatingAnim.play();
                         }
+                    });
+                }
+
+                // Improved function to completely fade out both circles
+                function fadeOutCircle(circle, radiatingCircle, radiatingAnim) {
+                    radiatingAnim.pause();
+
+                    gsap.to([circle, radiatingCircle], {
+                        opacity: 0,
+                        duration: 0.5,
+                        ease: "power2.in",
+                        onComplete: () => {
+                            gsap.set([circle, radiatingCircle], { opacity: 0 });
+                        }
+                    });
+                }
+
+                // Create animation for first path
+                gsap.to(path1, {
+                    strokeDashoffset: 0,
+                    duration: 1,
+                    ease: "power2.out",
+                    scrollTrigger: {
+                        trigger: "#step-create",
+                        start: "top 80%",
+                        end: "+=250",
+                        scrub: 0.5,
+                        markers: false,
+                        id: "path1"
                     }
+                });
+
+                // Create animation for second path
+                gsap.to(path2, {
+                    strokeDashoffset: 0,
+                    duration: 1,
+                    ease: "power2.out",
+                    scrollTrigger: {
+                        trigger: "#step-deliver",
+                        start: "top 80%",
+                        end: "+=250",
+                        scrub: 0.5,
+                        markers: false,
+                        id: "path2"
+                    }
+                });
+
+                // Independent ScrollTrigger for start circle
+                ScrollTrigger.create({
+                    trigger: "#step-create",
+                    start: "top 80%",
+                    end: "+=50", // Short range to make it appear quickly
+                    scrub: true,
+                    id: "start-circle-control",
+                    onEnter: () => {
+                        fadeInCircle(startCircle, startRadiating, startRadiatingAnim);
+                    },
+                    onLeaveBack: () => {
+                        fadeOutCircle(startCircle, startRadiating, startRadiatingAnim);
+                    }
+                });
+
+                // Independent ScrollTrigger for middle circle
+                ScrollTrigger.create({
+                    trigger: "#step-create",
+                    start: "top 50%", // Appears when we're halfway through the first section
+                    end: "+=50",
+                    scrub: true,
+                    id: "middle-circle-control",
+                    onEnter: () => {
+                        fadeInCircle(middleCircle, middleRadiating, middleRadiatingAnim);
+                    },
+                    onLeaveBack: () => {
+                        fadeOutCircle(middleCircle, middleRadiating, middleRadiatingAnim);
+                    }
+                });
+
+                // Independent ScrollTrigger for end circle
+                ScrollTrigger.create({
+                    trigger: "#step-deliver",
+                    start: "top 50%", // Appears when we're halfway through the second section
+                    end: "+=50",
+                    scrub: true,
+                    id: "end-circle-control",
+                    onEnter: () => {
+                        fadeInCircle(endCircle, endRadiating, endRadiatingAnim);
+                    },
+                    onLeaveBack: () => {
+                        fadeOutCircle(endCircle, endRadiating, endRadiatingAnim);
+                    }
+                });
+
+                // Refresh ScrollTrigger when window resizes
+                window.addEventListener('resize', () => {
+                    ScrollTrigger.refresh();
                 });
             }
         }
+    }
+});
 
-        lastMouseX = e.clientX;
-        lastMouseY = e.clientY;
-        lastTimestamp = currentTime;
+// =====================
+// CONTACT FORM - Using event delegation approach
+// =====================
+document.addEventListener('DOMContentLoaded', function() {
+    console.log("Contact form initialization starting");
+
+    // Use event delegation - attach to document instead of specific elements
+    document.addEventListener('click', function(e) {
+        // Check if clicked element or any of its parents has the contact-trigger class
+        const trigger = e.target.closest('.contact-trigger');
+        if (trigger) {
+            console.log("Contact trigger clicked via delegation");
+            e.preventDefault();
+            const contactFormContainer = document.getElementById('contact-form-container');
+            if (contactFormContainer) {
+                document.body.style.overflow = 'hidden';
+                contactFormContainer.classList.add('active');
+            }
+        }
     });
 
-    function triggerSway(plant, force, direction) {
-        // Add randomness to this plant
-        const randomForce = force * (0.8 + Math.random() * 0.4); // 80-120% of calculated force
-        const randomDuration = 0.9 + Math.random() * 0.2; // Random duration 0.9-1.1x
+    // The rest of your contact form code (close button, form submission)
+    const contactFormContainer = document.getElementById('contact-form-container');
+    const closeContactForm = document.getElementById('close-contact-form');
 
-        // Cancel any existing animations
-        gsap.killTweensOf(plant);
-
-        // Create damped oscillation animation based on the graph
-        const timeline = gsap.timeline();
-
-        // Initial peak - faster for stronger forces
-        timeline.to(plant, {
-            rotation: direction * randomForce,
-            duration: Math.max(0.2, randomDuration * 0.4 * (1 - randomForce/20)), // Faster for stronger forces
-            ease: "sine.out"
+    if (closeContactForm && contactFormContainer) {
+        closeContactForm.addEventListener('click', function() {
+            console.log("Close button clicked");
+            contactFormContainer.classList.remove('active');
+            setTimeout(() => {
+                document.body.style.overflow = '';
+            }, 500);
         });
 
-        // First opposite peak
-        timeline.to(plant, {
-            rotation: -direction * randomForce * 0.7,
-            duration: randomDuration * 0.8,
-            ease: "sine.inOut"
-        });
-
-        // Second peak
-        timeline.to(plant, {
-            rotation: direction * randomForce * 0.5,
-            duration: randomDuration * 0.8,
-            ease: "sine.inOut"
-        });
-
-        // Third opposite peak
-        timeline.to(plant, {
-            rotation: -direction * randomForce * 0.3,
-            duration: randomDuration * 0.8,
-            ease: "sine.inOut"
-        });
-
-        // Return to center
-        timeline.to(plant, {
-            rotation: 0,
-            duration: randomDuration * 0.8,
-            ease: "sine.inOut"
+        contactFormContainer.addEventListener('click', function(e) {
+            if (e.target === contactFormContainer) {
+                console.log("Clicked outside form");
+                contactFormContainer.classList.remove('active');
+                setTimeout(() => {
+                    document.body.style.overflow = '';
+                }, 500);
+            }
         });
     }
 
-    // Add subtle ambient movement
-    plants.forEach((plant, index) => {
-        const delay = index * 0.3;
+    const contactForm = document.getElementById('contact-form');
+    if (contactForm) {
+        contactForm.addEventListener('submit', function(e) {
+            console.log("Form submitted");
+            e.preventDefault();
 
-        function ambientMovement() {
-            const randomRotation = -0.3 + Math.random() * 0.6; // -0.3 to 0.3 degrees
-            const randomDuration = 2 + Math.random() * 2; // 2-4 seconds
+            // Get form data
+            const name = document.getElementById('name').value;
+            const email = document.getElementById('email').value;
+            const inquiry = document.getElementById('inquiry').value;
 
-            gsap.to(plant, {
-                rotation: randomRotation,
-                duration: randomDuration,
-                ease: "sine.inOut",
-                delay: delay,
-                onComplete: ambientMovement
-            });
-        }
+            // Here you would typically send the data to your server
+            console.log('Form submitted:', { name, email, inquiry });
 
-        ambientMovement();
-    });
+            // Show success message
+            alert('Thank you for your message! We will get back to you soon.');
 
-
+            // Reset form and close it
+            contactForm.reset();
+            contactFormContainer.classList.remove('active');
+            document.body.style.overflow = '';
+        });
+    }
 });
