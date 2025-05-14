@@ -720,6 +720,27 @@ body {
     text-align: center;
 }
 
+.cta-contact-button {
+  display: inline-block;
+padding: 15px 35px;
+background-color: black;
+border: 2px solid black;
+color: white;
+text-decoration: none;
+font-size: 1.1rem;
+border-radius: 50px;
+transition: all 0.3s ease;
+font-weight: 500;
+cursor: pointer;
+position: relative;
+}
+
+.cta-contact-button:hover {
+    background-color: white;
+    color: black;
+}
+
+
 .cta-button-large {
     display: inline-block;
     padding: 15px 35px;
@@ -1186,6 +1207,12 @@ body {
 .services-cta-button:hover {
     background-color: white;
     color: black;
+}
+
+.service-section-wrapper {
+  background-color: #f8f6ed;
+  width: 100%;
+  padding: 40px 0; /* Optional: adds vertical spacing */
 }
 
 
